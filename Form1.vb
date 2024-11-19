@@ -9,29 +9,54 @@ Public Class Form1
     End Sub
 
 
-    Private Async Sub Start_Click(sender As Object, e As EventArgs) Handles start.Click
+
+
+
+    Private Async Sub Start_Click2(sender As Object, e As EventArgs) Handles start.Click
+
+
+        Dim test_async = Async Sub() Await Task.Delay(10000)
+
+        Dim p = PrintAsync()
+
+        Console.WriteLine("Конец")
+
+        Await p
+
+
+
+    End Sub
+
+
+    Async Function PrintAsync() As Task
+
+        Console.WriteLine("Начало PrintAsync")
+        Await Task.Run(Sub()
+                           Thread.Sleep(10000)
+                       End Sub
+            )
+        Console.WriteLine("Конец PrintAsync")
+
+    End Function
+
+
+    Private Async Sub Start_Click(sender As Object, e As EventArgs)
 
         cts = New CancellationTokenSource()
         Dim token = cts.Token
 
         Dim t As Task(Of Boolean) = Task.Run(Function() As Boolean
-                                                 Return test1()
-                                                 If token.IsCancellationRequested Then
-                                                     token.ThrowIfCancellationRequested()
-                                                 End If
-                                             End Function, token)
+                                                 Return test1(token)
+                                             End Function)
+
         Console.WriteLine(" код 1!")
 
-
         'cts.Cancel()
-        'cts.CancelAfter(1000)
+        cts.CancelAfter(3000)
 
         Try
-
-
             If Await t Then
                 Console.WriteLine("t вернуло")
-                cts.Cancel()
             End If
 
             Console.WriteLine(" код 2!")
@@ -45,24 +70,21 @@ Public Class Form1
     End Sub
 
 
-    Function test1() As Boolean
+    Function test1(Token As CancellationToken) As Boolean
 
-        For i = 0 To 5000000000
-            'Console.WriteLine(i & " - Асинхронный поток")
+        For i = 0 To 10
 
-            'If i = 5 Then
-            '    cts.Cancel()
+            'If Token.IsCancellationRequested Then
+            '    Token.ThrowIfCancellationRequested()
             'End If
 
-            'Await Task.Delay(1000, ct)
-        Next
+            Thread.Sleep(1000)
+            Console.WriteLine(i)
 
+        Next
 
         Return True
 
     End Function
-
-
-
 
 End Class
